@@ -1,0 +1,33 @@
+package P2P;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+
+public class serverthreadthread extends Thread {
+    private serverthread ServerThread ;
+    private Socket socket;
+    private PrintWriter writer ;
+    //initializing attributes
+    public serverthreadthread(Socket socket , serverthread ServerThread ){
+        this.ServerThread = ServerThread;
+        this.socket = socket;
+    }
+    public void Run (){
+        try{
+            BufferedReader reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+            this.writer = new PrintWriter(socket.getOutputStream(),true);
+            while (true){
+                ServerThread.SendMessage(reader.readLine());
+            }
+        }
+        catch (Exception E){
+            ServerThread.getServerthreadthreads().remove(this);
+        }
+    }
+    //get method
+    public PrintWriter getWriter(){
+        return writer;
+    }
+}

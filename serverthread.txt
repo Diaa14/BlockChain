@@ -1,0 +1,43 @@
+package P2P ;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.HashSet;
+import java.util.Set;
+
+public class serverthread extends Thread {
+    private ServerSocket serverSocket ;
+    //set of server thread threads
+    private Set<serverthreadthread> serverthreadthreads = new HashSet<serverthreadthread>();
+    //initialize server socket with the port number
+    public serverthread (String portnumber )throws IOException{
+        serverSocket = new ServerSocket(Integer.valueOf(portnumber));
+    }
+    public void Run (){
+        try{
+            while (true){
+                //server thread thread for each peer
+                serverthreadthread ServerThreadThread = new serverthreadthread(serverSocket.accept(),this);
+                //add those to the set
+                serverthreadthreads.add(ServerThreadThread);
+                ServerThreadThread.start(); // triggers Run at serverthreadthreadcass
+            }
+        }
+        catch (Exception E){
+            E.printStackTrace();
+        }
+    }
+    //method for sending messages
+    public void SendMessage(String message){
+        //for each one in the set print the message
+        try{
+            serverthreadthreads.forEach(t-> t.getWriter().println(message));
+        }
+        catch (Exception E){
+            E.printStackTrace();
+        }
+    }
+    //get method
+    public Set<serverthreadthread> getServerthreadthreads(){
+        return serverthreadthreads ;
+    }
+}
