@@ -1,0 +1,31 @@
+package P2P ;
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.net.Socket;
+
+public class peerthread extends Thread{
+    private BufferedReader reader ;
+    //initialize buffer with messages from peers
+    public peerthread(Socket socket)throws IOException{
+        reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    }
+    public void Run (){
+        boolean flag = true ;
+        while(flag){
+            try{
+                //pick up messages from other peers in Json Format and prints their names and their messages
+                JsonObject jsonObject = Json.createReader(reader).readObject();
+                if (jsonObject.containsKey("username")){
+                    System.out.println("["+jsonObject.getString("username")+"]: "+jsonObject.getString("message"));
+                }
+            }
+            catch(Exception E){
+                flag = false;
+                interrupt();
+            }
+        }
+    }
+}
