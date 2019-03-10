@@ -1,0 +1,73 @@
+package P2P ;
+import javax.json.Json;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.net.Socket;
+
+public class peer {
+    public static void main (String [] args)throws Exception{
+        //taking the input from the user
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in)) ;
+        System.out.println("Enter the user name , and the port number for this peer ");
+        String [] install = reader.readLine().split(" ");
+        //instance of server thread and passing port number to the parameterized constructor
+        serverthread ServerThread = new serverthread(install[1]);
+        // start method triggers Run method
+        ServerThread.start();
+        new peer().UpdateListenToPeers(reader,install[0],ServerThread);
+    }
+    //method for updating the peers which this peer listen to them
+    public void  UpdateListenToPeers(BufferedReader reader , String username , serverthread ServerThread)throws Exception {
+        System.out.println("peers to receive messages from \nEnter the hosname:portnumber --> (peers are Space Separated)");
+        System.out.println("Enter 'skip' for Skipping");
+        String input = reader.readLine();
+        String [] InputValues =  input.split(" ");
+        if (!input.equals("skip")){
+            for (int counter = 0 ; counter<InputValues.length ; counter++ ){
+                String [] Address = InputValues[counter].split(":");
+                Socket socket = null ;
+                try{
+                    socket = new Socket(Address[0] , Integer.valueOf(Address[1]));
+                    new peerthread(socket).start();
+                }
+                catch (Exception E){
+                    if (socket != null){
+                        socket.close();
+                    }
+                    /*else {
+                        System.out.println("Invalid Input");
+                    }*/
+                }
+            }
+        }
+        Communicate(reader,username,ServerThread);
+    }
+    //meathod for communication and sending messages
+    public void Communicate (BufferedReader reader , String username , serverthread ServerThread){
+        try{
+            System.out.println("it's time for communication \n'e' for exit \n'c' to change peers you communicate to");
+            boolean flag = true ;
+            while(flag){
+                String message = reader.readLine();
+                if (message.equals("e")){
+                    flag =  false ;
+                    break;
+                }
+                else if (message.equals("c")){
+                    UpdateListenToPeers(reader,username,ServerThread);
+                }
+                //Pack the message and calling the send method
+                else {
+                    StringWriter write = new StringWriter();
+                    Json.createWriter(write).writeObject(Json.createObjectBuilder().add("username" , username).add("message" , message).build());
+                    ServerThread.SendMessage(write.toString());
+                }
+            }
+            System.exit(0);
+        }
+        catch (Exception E){
+
+        }
+    }
+}
